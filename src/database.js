@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 
-const databasePath = newURL("../db.json", import.meta.url);
+const databasePath = new URL("../db.json", import.meta.url);
 
 export class Database {
   #database = {};
@@ -48,7 +48,25 @@ export class Database {
     const rowIndex = this.#database[table].findIndex((row) => row.id === id);
 
     if (rowIndex > -1) {
-      this.#database[table][rowIndex] = { id, ...data };
+      const existingData = this.#database[table][rowIndex];
+      this.#database[table][rowIndex] = { ...existingData, id, ...data };
+      this.#persist();
+    }
+  }
+
+  updateStatus(table, id) {
+    const rowIndex = this.#database[table].findIndex((row) => row.id === id);
+
+    if (rowIndex > -1) {
+      const existingData = this.#database[table][rowIndex];
+      let completed_at;
+      if (!existingData.completed_at) {
+        completed_at = new Date();
+      } else {
+        completed_at = null;
+      }
+      console.log("completed_at", completed_at);
+      this.#database[table][rowIndex] = { ...existingData, id, completed_at };
       this.#persist();
     }
   }
